@@ -1,0 +1,7 @@
+overwrite: true
+schema: "https://wpe-hiring.tokopedia.net/"
+documents: "./src/components/**/*.{ts,tsx}"
+generates:
+  src/generated/graphql.tsx:
+    preset: "client"
+    plugins: []
