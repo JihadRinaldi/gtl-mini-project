@@ -11,4 +11,5 @@ body {
   letter-spacing: normal;
   position: relative;
   color: rgba(0, 0, 0, 0.67);
+  background-color: rgba(0, 0, 0, 0.1);
 }

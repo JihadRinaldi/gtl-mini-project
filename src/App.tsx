@@ -1,12 +1,30 @@
 import React from 'react';
 import ContactList from './components/ContactList';
-import { StyledAppWrapper } from './styles';
+import { 
+  StyledAppWrapper,
+  StyledHeaderWrapper,
+  StyledIcon,
+  StyledPhoneBookTitle,
+  StyledScreenGuard,
+ } from './styles';
+import { MdContactPhone } from 'react-icons/md'
 
 function App() {
   return (
-    <StyledAppWrapper>
-      <ContactList />
-    </StyledAppWrapper>
+    <StyledScreenGuard>
+      <StyledAppWrapper>
+        <StyledHeaderWrapper>
+          <StyledIcon>
+            <MdContactPhone />
+          </StyledIcon>
+          <StyledPhoneBookTitle>
+            Phone Book
+          </StyledPhoneBookTitle>
+        </StyledHeaderWrapper>
+        {/* ROUTES */}
+        <ContactList />
+      </StyledAppWrapper>
+    </StyledScreenGuard>
   );
 }
 

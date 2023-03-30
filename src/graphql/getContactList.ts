@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export default gql`
-  query GetContactList (
+  query GET_CONTACT_LIST (
     $distinct_on: [contact_select_column!], 
     $limit: Int, 
     $offset: Int, 
@@ -14,7 +14,7 @@ export default gql`
     offset: $offset, 
     order_by: $order_by, 
     where: $where
-  ){
+  ) {
     created_at
     first_name
     id
