@@ -5,7 +5,7 @@ import App from './App';
 import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: "https://wpe-hiring.tokopedia.net/graphql",
+  uri: process.env.REACT_APP_BACKEND_API_URL,
   cache: new InMemoryCache()
 });
 

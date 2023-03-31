@@ -9,9 +9,11 @@ import {
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import {
-  PlusOutlined,
   DeleteOutlined,
+  EditOutlined,
   PhoneOutlined,
+  PlusOutlined,
+  StarFilled,
  } from '@ant-design/icons';
 
  import { StyledContactListWrapper, StyledContactsWrapper } from './styles';
@@ -23,12 +25,14 @@ import {
    GET_CONTACT_SIZE,
  } from '../../graphql';
  import useDebounce from '../../hooks/useDebounce';
+import AddContactDialog from '../AddContactDialog';
 
 const ContactList = () => {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [pageOffset, setPageOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const debounceKeyword: string = useDebounce<string>(searchKeyword, 500);
   
   const searchClause = useMemo(
@@ -55,6 +59,9 @@ const ContactList = () => {
     variables: {
       limit: pageSize,
       offset: pageOffset,
+      order_by: {
+        "first_name": "asc"
+      },
       ...(!!debounceKeyword && { where: searchClause})
     },
   });
@@ -69,7 +76,10 @@ const ContactList = () => {
   const contactsData = useMemo(
    () => {
     if (!isGetContactListLoading && getContactListData) {
-      return getContactListData.contact;
+      return getContactListData.contact.map(contact => ({
+        ...contact,
+        favorite: false,
+      }));
     }
     return [];
    }, [getContactListData, isGetContactListLoading],
@@ -93,13 +103,19 @@ const ContactList = () => {
     })
   };
 
+  const handleDialog = () => {
+    setIsDialogOpen(prevState => !prevState);
+  };
+  
+
+
   const tableColumns: ColumnsType<ContactData> = [
     {
       title: 'Name',
       key: 'name',
       dataIndex: ['first_name', 'last_name'],
       render: (_, {first_name, last_name}) => (
-        <Typography.Link>{`${first_name} ${last_name}`}</Typography.Link>
+        <Typography.Text>{`${first_name} ${last_name}`}</Typography.Text>
       ),
     },
     {
@@ -120,13 +136,25 @@ const ContactList = () => {
     {
       key: 'action',
       dataIndex: 'phones',
+      width: '20%',
       render: (_, { id }) => (
-        <Space size="middle">
+        <Space size="middle" wrap>
+          <Button
+            type='default'
+            icon={<EditOutlined />}
+          />
           <Button
           danger={true}
           icon={<DeleteOutlined />}
           onClick={() => handleRemoveContact(id)}
         />
+          <Button
+          style={{
+            border: '1px solid gold'
+          }}
+          icon={<StarFilled style={{ color: 'gold' }} />}
+        />
+        
         </Space>
       ),
     },
@@ -144,36 +172,43 @@ const ContactList = () => {
   };
 
   return (
-    <StyledContactListWrapper direction='vertical' size={16}>
-      <StyledContactsWrapper>
-        <Typography.Text strong={true}>
-          Contacts
-        </Typography.Text>
-        <Button type='primary' icon={<PlusOutlined />}>
-          Add Contact
-        </Button>
-      </StyledContactsWrapper>
-      <div>
+    <>
+      <StyledContactListWrapper direction='vertical' size={16}>
+        <StyledContactsWrapper>
         <Input.Search
-          allowClear
-          placeholder="Search for contact by name or number"
-          onChange={e => handleSearch(e.target.value)}
+            allowClear
+            placeholder="Search for contact by name or number"
+            onChange={e => handleSearch(e.target.value)}
+          />
+          <Button
+            type='primary'
+            icon={<PlusOutlined />}
+            onClick={handleDialog}
+          >
+            Add Contact
+          </Button>
+        </StyledContactsWrapper>
+        <Table
+          // TODO: HANDLE ROW COLOR FOR FAVORITE
+          rowClassName={(record, index) => {console.log(record); return index % 2 === 0 ? 'table-row-light' :  'table-row-dark'}}
+          columns={tableColumns}
+          dataSource={contactsData}
+          loading={isGetContactListLoading || isGetContactSizeLoading}
+          rowKey="id"
+          pagination={{
+            current: currentPage,
+            onChange: handlePaginationChange,
+            position: ['bottomCenter'],
+            showSizeChanger: false,
+            total: contactSize,
+          }}
         />
-      </div>
-      <Table
-        columns={tableColumns}
-        dataSource={contactsData}
-        loading={isGetContactListLoading || isGetContactSizeLoading}
-        rowKey="id"
-        pagination={{
-          current: currentPage,
-          onChange: handlePaginationChange,
-          position: ['bottomCenter'],
-          showSizeChanger: false,
-          total: contactSize,
-        }}
+      </StyledContactListWrapper>
+      <AddContactDialog
+        isOpen={isDialogOpen}
+        handleCloseModal={handleDialog}
       />
-    </StyledContactListWrapper>
+    </>
   );
 };
 

@@ -11,20 +11,21 @@ import { MdContactPhone } from 'react-icons/md'
 
 function App() {
   return (
-    <StyledScreenGuard>
-      <StyledAppWrapper>
-        <StyledHeaderWrapper>
-          <StyledIcon>
-            <MdContactPhone />
-          </StyledIcon>
-          <StyledPhoneBookTitle>
-            Phone Book
-          </StyledPhoneBookTitle>
-        </StyledHeaderWrapper>
-        {/* ROUTES */}
-        <ContactList />
-      </StyledAppWrapper>
-    </StyledScreenGuard>
+    <>
+      <StyledScreenGuard>
+        <StyledAppWrapper>
+          <StyledHeaderWrapper>
+            <StyledIcon>
+              <MdContactPhone />
+            </StyledIcon>
+            <StyledPhoneBookTitle>
+              Phone Book
+            </StyledPhoneBookTitle>
+          </StyledHeaderWrapper>
+          <ContactList />
+        </StyledAppWrapper>
+      </StyledScreenGuard>
+    </>
   );
 }
 

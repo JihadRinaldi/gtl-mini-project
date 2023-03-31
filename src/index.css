@@ -13,3 +13,7 @@ body {
   color: rgba(0, 0, 0, 0.67);
   background-color: rgba(0, 0, 0, 0.1);
 }
+
+.ant-table-cell {
+  vertical-align: top;
+}
