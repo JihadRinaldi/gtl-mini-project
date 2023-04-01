@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import {
   Button,
   Typography,
@@ -17,15 +17,17 @@ import {
  } from '@ant-design/icons';
 
  import { StyledContactListWrapper, StyledContactsWrapper } from './styles';
- import { ContactAggregateData, ContactData, ContactListData } from './interface';
+ import { IContactAggregateData, IContactByPk, IContactData, IContactListData } from './interface';
  
  import {
    DELETE_CONTACT,
+   GET_CONTACT_DETAIL,
    GET_CONTACT_LIST,
    GET_CONTACT_SIZE,
  } from '../../graphql';
  import useDebounce from '../../hooks/useDebounce';
 import AddContactDialog from '../AddContactDialog';
+import { SORT_TYPE } from '../../utils/constants';
 
 const ContactList = () => {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
@@ -33,21 +35,22 @@ const ContactList = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [contactDetail, setContactDetail] = useState<IContactData>();
   const debounceKeyword: string = useDebounce<string>(searchKeyword, 500);
   
   const searchClause = useMemo(
     () => {
       return {
-        "_or": [
+        _or: [
           {
-            "first_name": { "_ilike": `%${debounceKeyword}%` },
+            first_name: { _ilike: `%${debounceKeyword}%` },
           },
           {
-            "last_name": { "_ilike": `%${debounceKeyword}%` },
+            last_name: { _ilike: `%${debounceKeyword}%` },
           },
           {
-            "phones": {
-              "number": { "_ilike": `%${debounceKeyword}%` },
+            phones: {
+              number: { _ilike: `%${debounceKeyword}%` },
             },
           },
         ]
@@ -55,22 +58,22 @@ const ContactList = () => {
     }, [debounceKeyword],
   );
 
-  const { data: getContactListData, loading: isGetContactListLoading } = useQuery<ContactListData>(GET_CONTACT_LIST, {
+  const { data: getContactListData, loading: isGetContactListLoading } = useQuery<IContactListData>(GET_CONTACT_LIST, {
     variables: {
       limit: pageSize,
       offset: pageOffset,
       order_by: {
-        "first_name": "asc"
+        "first_name": SORT_TYPE.ASC
       },
       ...(!!debounceKeyword && { where: searchClause})
     },
   });
-  const { data: getContactSizeData, loading: isGetContactSizeLoading } = useQuery<ContactAggregateData>(GET_CONTACT_SIZE, {
+  const { data: getContactSizeData, loading: isGetContactSizeLoading } = useQuery<IContactAggregateData>(GET_CONTACT_SIZE, {
     variables: {
       where: searchClause,
     },
   });
-
+  const [getContactDetail, {loading: getContactDetailLoading }] = useLazyQuery<IContactByPk>(GET_CONTACT_DETAIL);
   const [deleteContact] = useMutation(DELETE_CONTACT);
 
   const contactsData = useMemo(
@@ -93,26 +96,41 @@ const ContactList = () => {
       return 0;
     }, [getContactSizeData, isGetContactSizeLoading],
   );
+
+  const handleDialogVisibility = (visibility: boolean) => {
+    if (!visibility) {
+      setContactDetail(undefined);
+    }
+    setIsDialogOpen(visibility);
+  };
   
-  const handleRemoveContact = (contactId:number) => {
+  const handleRemoveContact = (contactId: number) => {
     deleteContact({
       variables: {
         id: contactId,
       },
       refetchQueries: ['GET_CONTACT_LIST', 'GET_CONTACT_SIZE'],
-    })
+    });
   };
 
-  const handleDialog = () => {
-    setIsDialogOpen(prevState => !prevState);
+  const handleEditContact = async (contactId: number) => {
+    const contactDetail = await getContactDetail({
+      fetchPolicy: 'network-only',
+      variables: {
+        id: contactId,
+      },
+    });
+    if (contactDetail.data && contactDetail.data.contact_by_pk) {
+      setContactDetail(contactDetail.data?.contact_by_pk);
+      handleDialogVisibility(true);
+    };
   };
   
-
-
-  const tableColumns: ColumnsType<ContactData> = [
+  const tableColumns: ColumnsType<IContactData> = [
     {
       title: 'Name',
       key: 'name',
+      width: '30%',
       dataIndex: ['first_name', 'last_name'],
       render: (_, {first_name, last_name}) => (
         <Typography.Text>{`${first_name} ${last_name}`}</Typography.Text>
@@ -142,6 +160,7 @@ const ContactList = () => {
           <Button
             type='default'
             icon={<EditOutlined />}
+            onClick={() => handleEditContact(id)}
           />
           <Button
           danger={true}
@@ -183,14 +202,12 @@ const ContactList = () => {
           <Button
             type='primary'
             icon={<PlusOutlined />}
-            onClick={handleDialog}
+            onClick={() => handleDialogVisibility(true)}
           >
             Add Contact
           </Button>
         </StyledContactsWrapper>
         <Table
-          // TODO: HANDLE ROW COLOR FOR FAVORITE
-          rowClassName={(record, index) => {console.log(record); return index % 2 === 0 ? 'table-row-light' :  'table-row-dark'}}
           columns={tableColumns}
           dataSource={contactsData}
           loading={isGetContactListLoading || isGetContactSizeLoading}
@@ -204,10 +221,14 @@ const ContactList = () => {
           }}
         />
       </StyledContactListWrapper>
-      <AddContactDialog
-        isOpen={isDialogOpen}
-        handleCloseModal={handleDialog}
-      />
+      {isDialogOpen && !getContactDetailLoading
+        ? (<AddContactDialog
+            editContactData={contactDetail}
+            isOpen={isDialogOpen}
+            handleModal={handleDialogVisibility}
+          />)
+        : null
+      }
     </>
   );
 };

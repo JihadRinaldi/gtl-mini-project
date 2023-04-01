@@ -1,23 +1,27 @@
-export interface ContactListData {
-  contact: [ContactData];
+export interface IContactListData {
+  contact: [IContactData];
 };
 
-export interface ContactData {
+export interface IContactData {
   id: number;
   created_at: string;
   first_name: string;
   last_name: string;
-  phones: [PhoneData];
+  phones: [IPhoneData];
 };
 
-export interface PhoneData {
+export interface IPhoneData {
   number: string;
 };
 
-export interface ContactAggregateData {
+export interface IContactAggregateData {
   contact_aggregate: {
     aggregate: {
       count: number;
     };
   };
 };
+
+export interface IContactByPk {
+  contact_by_pk: IContactData;
+}
