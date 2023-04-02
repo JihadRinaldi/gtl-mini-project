@@ -19,3 +19,5 @@ export const PHONES_INITIAL_VALUES = [{
 export const VALID_PHONE_NUMBER_REGEX = /^[+]?[0-9]{8,14}$/;
 
 export const VALID_CONTACT_NAME_REGEX = /^[a-zA-Z0-9 ]*$/;
+
+export const APP_FAVORITE_KEY = 'favoriteContactId';

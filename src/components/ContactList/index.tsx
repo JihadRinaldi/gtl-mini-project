@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import {
   Button,
@@ -16,7 +16,7 @@ import {
   PlusCircleOutlined,
  } from '@ant-design/icons';
 
- import { StyledContactListWrapper, StyledContactsWrapper, StyledStarFilledIcon } from './styles';
+ import { StyledContactListWrapper, StyledContactsWrapper, StyledFavoriteButton, StyledStarFilledIcon, StyledStarOurlinedIcon } from './styles';
  import { IContactAggregateData, IContactByPk, IContactData, IContactListData } from './interface';
  
  import {
@@ -27,8 +27,9 @@ import {
  } from '../../graphql';
  import useDebounce from '../../hooks/useDebounce';
 import AddContactDialog from '../ContactDialog';
-import { SORT_TYPE } from '../../utils/constants';
-import ConfirmationDialog from '../ConfirmationDialog';
+import { APP_FAVORITE_KEY, SORT_TYPE } from '../../utils/constants';
+import AddPhoneDialog from '../AddPhoneDialog';
+import { arrayReOrder, saveFavoriteToLocalStorage } from '../../utils';
 
 const ContactList = () => {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
@@ -36,9 +37,10 @@ const ContactList = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [isConfirmationOpen, setIsConfirmationOpen] = useState<boolean>(false);
+  const [isAddPhoneDialogOpen, setIsAddPhoneDialogOpen] = useState<boolean>(false);
   const [contactDetail, setContactDetail] = useState<IContactData>();
   const [deletedContactId, setDeletedContactId] = useState<number>();
+  const [favoriteContactIds, setFavoriteContactIds] = useState<any[]>([]);
   const debounceKeyword: string = useDebounce<string>(searchKeyword, 500);
   
   const searchClause = useMemo(
@@ -82,13 +84,18 @@ const ContactList = () => {
   const contactsData = useMemo(
    () => {
     if (!isGetContactListLoading && getContactListData) {
-      return getContactListData.contact.map(contact => ({
+      const contactList = getContactListData.contact.map(contact => ({
         ...contact,
         favorite: false,
       }));
+      if (favoriteContactIds.length) {
+        console.log('inn', arrayReOrder(contactList, favoriteContactIds, 'id'));
+        return arrayReOrder(contactList, favoriteContactIds, 'id');
+      }
+      return contactList;
     }
     return [];
-   }, [getContactListData, isGetContactListLoading],
+   }, [getContactListData, isGetContactListLoading, favoriteContactIds],
   );
 
   const contactSize = useMemo<number>(
@@ -107,8 +114,8 @@ const ContactList = () => {
     setIsDialogOpen(visibility);
   };
 
-  const handleDeleteConfirmation = (visibility: boolean) => {
-    setIsConfirmationOpen(visibility);
+  const handleAddPhoneVisibility = (visibility: boolean) => {
+    setIsAddPhoneDialogOpen(visibility);
   };
   
   const handleRemoveContact = (contactId: number) => {
@@ -118,6 +125,19 @@ const ContactList = () => {
       },
       refetchQueries: ['GET_CONTACT_LIST', 'GET_CONTACT_SIZE'],
     });
+  };
+
+  const handleFavoriteContact = (contactId: number) => {
+    if (favoriteContactIds.includes(contactId)) {
+      const filteredFavoriteContacts = favoriteContactIds.filter(id => (
+        id !== contactId
+      ));
+      setFavoriteContactIds(filteredFavoriteContacts);
+      localStorage.setItem(APP_FAVORITE_KEY, JSON.stringify(filteredFavoriteContacts));
+    } else {
+      const favoriteList = saveFavoriteToLocalStorage(contactId);
+      setFavoriteContactIds(favoriteList);
+    }
   };
 
   const handleEditContact = async (contactId: number) => {
@@ -159,7 +179,7 @@ const ContactList = () => {
             <PlusCircleOutlined />
             <Typography.Link
               onClick={() => {
-                handleDeleteConfirmation(true)
+                handleAddPhoneVisibility(true)
                 setDeletedContactId(id)
               }}
               style={{ whiteSpace: 'nowrap' }}
@@ -173,7 +193,7 @@ const ContactList = () => {
     {
       key: 'action',
       dataIndex: 'phones',
-      width: '20%',
+      width: '25%',
       render: (_, { id }) => (
         <Space size="middle" wrap>
           <Button
@@ -186,11 +206,12 @@ const ContactList = () => {
           icon={<DeleteOutlined />}
           onClick={() => handleRemoveContact(id)}
         />
-          <Button
+          <StyledFavoriteButton
           style={{
             border: '1px solid gold'
           }}
-          icon={<StyledStarFilledIcon />}
+          onClick={() => handleFavoriteContact(id)}
+          icon={favoriteContactIds.includes(id) ? <StyledStarFilledIcon /> : <StyledStarOurlinedIcon />}
         />
         
         </Space>
@@ -208,6 +229,13 @@ const ContactList = () => {
   const handleSearch = (e: string) => {
     setSearchKeyword(e.trim());
   };
+
+  useEffect(() => {
+  const favoriteContactList = localStorage.getItem(APP_FAVORITE_KEY);
+  if (favoriteContactList) {
+    setFavoriteContactIds(JSON.parse(favoriteContactList));
+  };
+  }, [])
 
   return (
     <>
@@ -248,10 +276,10 @@ const ContactList = () => {
           />)
         : null
       }
-      <ConfirmationDialog
-        isOpen={isConfirmationOpen}
+      <AddPhoneDialog
+        isOpen={isAddPhoneDialogOpen}
         contactId={deletedContactId}
-        handleModal={handleDeleteConfirmation}
+        handleModal={handleAddPhoneVisibility}
       />
     </>
   );

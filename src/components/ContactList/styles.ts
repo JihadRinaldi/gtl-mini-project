@@ -1,6 +1,6 @@
 import { StarFilled, StarOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled'
-import { Space, Typography } from 'antd';
+import { Button, Space, Typography } from 'antd';
 
 export const StyledContactsWrapper = styled.div`
   display: flex;
@@ -31,4 +31,8 @@ export const StyledStarFilledIcon = styled(StarFilled)`
 
 export const StyledStarOurlinedIcon = styled(StarOutlined)`
   color: gold;
+`;
+
+export const StyledFavoriteButton = styled(Button)`
+  border: '1px solid gold';
 `;
