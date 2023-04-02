@@ -1,5 +1,6 @@
+import { StarFilled, StarOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled'
-import { Space, Table, Typography } from 'antd';
+import { Space, Typography } from 'antd';
 
 export const StyledContactsWrapper = styled.div`
   display: flex;
@@ -24,8 +25,10 @@ export const StyledTextNoWrap = styled(Typography.Text)`
   white-space: no-wrap;
 `;
 
-export const StyledTable = styled(Table)`
-  .ant-table-cell {
-    vertical-align: top;
-  }
+export const StyledStarFilledIcon = styled(StarFilled)`
+  color: gold;
+`;
+
+export const StyledStarOurlinedIcon = styled(StarOutlined)`
+  color: gold;
 `;

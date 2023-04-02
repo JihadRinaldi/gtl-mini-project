@@ -13,10 +13,10 @@ import {
   EditOutlined,
   PhoneOutlined,
   PlusOutlined,
-  StarFilled,
+  PlusCircleOutlined,
  } from '@ant-design/icons';
 
- import { StyledContactListWrapper, StyledContactsWrapper } from './styles';
+ import { StyledContactListWrapper, StyledContactsWrapper, StyledStarFilledIcon } from './styles';
  import { IContactAggregateData, IContactByPk, IContactData, IContactListData } from './interface';
  
  import {
@@ -28,6 +28,7 @@ import {
  import useDebounce from '../../hooks/useDebounce';
 import AddContactDialog from '../ContactDialog';
 import { SORT_TYPE } from '../../utils/constants';
+import ConfirmationDialog from '../ConfirmationDialog';
 
 const ContactList = () => {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
@@ -35,7 +36,9 @@ const ContactList = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState<boolean>(false);
   const [contactDetail, setContactDetail] = useState<IContactData>();
+  const [deletedContactId, setDeletedContactId] = useState<number>();
   const debounceKeyword: string = useDebounce<string>(searchKeyword, 500);
   
   const searchClause = useMemo(
@@ -103,6 +106,10 @@ const ContactList = () => {
     }
     setIsDialogOpen(visibility);
   };
+
+  const handleDeleteConfirmation = (visibility: boolean) => {
+    setIsConfirmationOpen(visibility);
+  };
   
   const handleRemoveContact = (contactId: number) => {
     deleteContact({
@@ -140,7 +147,7 @@ const ContactList = () => {
       title: 'Phone Number',
       key: 'phones',
       dataIndex: 'phones',
-      render: (_, { phones }) => (
+      render: (_, { phones, id }) => (
         <Space direction='vertical'>
           {phones.map(phone => (
             <Space key={phone.number}>
@@ -148,6 +155,18 @@ const ContactList = () => {
               <Typography.Text>{phone.number}</Typography.Text>
             </Space>
           ))}
+          <Space direction='horizontal'>
+            <PlusCircleOutlined />
+            <Typography.Link
+              onClick={() => {
+                handleDeleteConfirmation(true)
+                setDeletedContactId(id)
+              }}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              Add new Number
+            </Typography.Link>
+          </Space>
         </Space>
       ),
     },
@@ -171,7 +190,7 @@ const ContactList = () => {
           style={{
             border: '1px solid gold'
           }}
-          icon={<StarFilled style={{ color: 'gold' }} />}
+          icon={<StyledStarFilledIcon />}
         />
         
         </Space>
@@ -229,6 +248,11 @@ const ContactList = () => {
           />)
         : null
       }
+      <ConfirmationDialog
+        isOpen={isConfirmationOpen}
+        contactId={deletedContactId}
+        handleModal={handleDeleteConfirmation}
+      />
     </>
   );
 };
