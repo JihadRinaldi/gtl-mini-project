@@ -26,7 +26,7 @@ import {
    GET_CONTACT_SIZE,
  } from '../../graphql';
  import useDebounce from '../../hooks/useDebounce';
-import AddContactDialog from '../AddContactDialog';
+import AddContactDialog from '../ContactDialog';
 import { SORT_TYPE } from '../../utils/constants';
 
 const ContactList = () => {
