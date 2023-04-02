@@ -26,6 +26,7 @@ const ConfirmationDialog = ({
         contact_id: contactId,
         phone_number: values?.phone_number,
       },
+      refetchQueries: ['GET_CONTACT_LIST', 'GET_CONTACT_SIZE'],
     });
     message.success(`New Phone Number Successfully Created`);
     handleModal(false);
