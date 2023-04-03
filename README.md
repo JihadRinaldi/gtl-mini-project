@@ -16,6 +16,12 @@ These are the main library for creating the UI
 
 This project deploy on Vercel and you can access it through this https://gtl-mini-project.vercel.app
 
+## Coverage Report
+
+Create Unit Test and Integration Test using React Testing Library/JEST under `__tests__` folder and Mocks GraphQL Queries/Mutations
+
+![Coverage Report](https://i.imgur.com/gL6OfbJ.png)
+
 ## Available Scripts
 ### `yarn start`
 
