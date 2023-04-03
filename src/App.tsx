@@ -16,9 +16,9 @@ function App() {
         <StyledAppWrapper>
           <StyledHeaderWrapper>
             <StyledIcon>
-              <MdContactPhone />
+              <MdContactPhone data-testid="iconPhonebook" />
             </StyledIcon>
-            <StyledPhoneBookTitle>
+            <StyledPhoneBookTitle data-testid="titlePhonebook">
               Phone Book
             </StyledPhoneBookTitle>
           </StyledHeaderWrapper>

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { Button, Form, Input, message, Modal, Typography } from 'antd';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { CloseOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 
 import { StyledPhoneNumberListWrapper, StyledSubmitWrapper } from './styles';
 import { ContactData } from './interface';
@@ -132,6 +132,7 @@ const AddContactDialog = ({
 
   return (
     <Modal
+      closeIcon={<CloseOutlined data-testid="iconCloseModal" />}
       destroyOnClose={true}
       footer={false}
       onCancel={handleClose}
@@ -156,7 +157,7 @@ const AddContactDialog = ({
             rules={[
               {
                 validator: (_, value) => {
-                  if (!value) {
+                  if (!value || !value.trim()) {
                     return Promise.reject('First Name should not be empty');
                   }
                   if (!VALID_CONTACT_NAME_REGEX.test(value)) {
@@ -169,6 +170,7 @@ const AddContactDialog = ({
           >
             <Input
               allowClear
+              data-testid="inputFirstName"
               placeholder='Enter First Name'
             />
           </Form.Item>
@@ -178,7 +180,7 @@ const AddContactDialog = ({
             rules={[
               {
                 validator: (_, value) => {
-                  if (!value) {
+                  if (!value || !value.trim()) {
                     return Promise.reject('Last Name should not be empty');
                   }
                   if (!VALID_CONTACT_NAME_REGEX.test(value)) {
@@ -191,6 +193,7 @@ const AddContactDialog = ({
           >
             <Input
               allowClear
+              data-testid="inputLastName"
               placeholder='Enter Last Name'
             />
           </Form.Item>
@@ -213,7 +216,7 @@ const AddContactDialog = ({
                     rules={[
                       {
                         validator: (_, value) => {
-                          if (!value) {
+                          if (!value || !value.trim()) {
                             return Promise.reject('Phone Number should not be empty');
                           }
                           if (!VALID_PHONE_NUMBER_REGEX.test(value)) {
@@ -226,6 +229,7 @@ const AddContactDialog = ({
                   >
                     <Input
                       allowClear
+                      data-testid="inputPhoneNumber"
                       placeholder={`Enter Phone Number ${key + 1}`}
                     />
                   </Form.Item>
@@ -242,6 +246,7 @@ const AddContactDialog = ({
                     onClick={() => add()}
                     block
                     icon={<PlusOutlined />}
+                    data-testid="btnAddPhoneNumber"
                   >
                     Add Phone Number
                   </Button>
@@ -255,6 +260,7 @@ const AddContactDialog = ({
             <Button
               htmlType='reset'
               loading={addContactLoading || editContactLoading || editPhoneLoading}
+              data-testid="btnResetContact"
             >
               {!!editContactData ? 'Reset' : 'Clear'}
             </Button>
@@ -262,6 +268,8 @@ const AddContactDialog = ({
               htmlType='submit'
               loading={addContactLoading || editContactLoading || editPhoneLoading}
               type='primary'
+              data-testid="btnSubmitContact"
+
             >
               {!!editContactData ? 'Update' : 'Submit'}
             </Button>

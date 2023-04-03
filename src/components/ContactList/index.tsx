@@ -89,7 +89,6 @@ const ContactList = () => {
         favorite: false,
       }));
       if (favoriteContactIds.length) {
-        console.log('inn', arrayReOrder(contactList, favoriteContactIds, 'id'));
         return arrayReOrder(contactList, favoriteContactIds, 'id');
       }
       return contactList;
@@ -183,6 +182,7 @@ const ContactList = () => {
                 setDeletedContactId(id)
               }}
               style={{ whiteSpace: 'nowrap' }}
+              data-testid="btnAddNumber"
             >
               Add new Number
             </Typography.Link>
@@ -200,18 +200,24 @@ const ContactList = () => {
             type='default'
             icon={<EditOutlined />}
             onClick={() => handleEditContact(id)}
+            data-testid="iconEditContact"
           />
           <Button
           danger={true}
           icon={<DeleteOutlined />}
           onClick={() => handleRemoveContact(id)}
+          data-testid="iconDeleteContact"
         />
           <StyledFavoriteButton
           style={{
             border: '1px solid gold'
           }}
           onClick={() => handleFavoriteContact(id)}
-          icon={favoriteContactIds.includes(id) ? <StyledStarFilledIcon /> : <StyledStarOurlinedIcon />}
+          data-testid="iconFavorite"
+          icon={favoriteContactIds.includes(id)
+            ? <StyledStarFilledIcon data-testid="iconRemoveFavorite" />
+            : <StyledStarOurlinedIcon data-testid="iconAddFavorite" />
+          }
         />
         
         </Space>
@@ -243,6 +249,7 @@ const ContactList = () => {
         <StyledContactsWrapper>
         <Input.Search
             allowClear
+            data-testid="inputSearchKeyword"
             placeholder="Search for contact by name or number"
             onChange={e => handleSearch(e.target.value)}
           />
@@ -250,6 +257,7 @@ const ContactList = () => {
             type='primary'
             icon={<PlusOutlined />}
             onClick={() => handleDialogVisibility(true)}
+            data-testid="btnAddContact"
           >
             Add Contact
           </Button>

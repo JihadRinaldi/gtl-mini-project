@@ -58,7 +58,7 @@ const ConfirmationDialog = ({
             rules={[
               {
                 validator: (_, value) => {
-                  if (!value) {
+                  if (!value || !value.trim()) {
                     return Promise.reject('Phone Number should not be empty');
                   }
                   if (!VALID_PHONE_NUMBER_REGEX.test(value)) {
@@ -71,12 +71,14 @@ const ConfirmationDialog = ({
           >
             <Input
               allowClear
+              data-testid="inputAddNewPhone"
               placeholder='Enter Phone Number'
             />
           </Form.Item>
         <Form.Item>
           <StyledSubmitWrapper>
             <Button
+              data-testid="btnSaveNewPhone"
               htmlType='submit'
               loading={addNumberLoading}
               type='primary'
